@@ -1,7 +1,7 @@
 const _ = require('underscore');
 const changeCase = require('change-case'); 
 
-import { FileService } from './file';
+import { FileService, replaceInFile, prependToFile } from './file';
 import { ComponentService } from './component';
 
 export class IntegrationService {
@@ -80,6 +80,15 @@ export class IntegrationService {
         FileService.writeFile(`/${directory}/index.ts`, templates.index);
       }
     }
-  }
 
+    const moduleClassName = `${variables.upperCamelCaseFn(variables.provider)}${variables.upperCamelCaseFn(variables.channelType)}Module`;
+
+    replaceInFile('src/modules/integrations/integrations.module.ts', 'imports: [', `imports: [\n ${moduleClassName},\n`)
+      .then(() => {
+        prependToFile(
+          'src/modules/integrations/integrations.module.ts',
+          `import { ${moduleClassName} } from './+${fileName}/${fileName}.module';`);
+        }
+      );
+  }
 }
